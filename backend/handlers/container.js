@@ -80,6 +80,25 @@ export const killContainerHandler = async (req, res) => {
     }
 };
 
+export const restartContainerHandler = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const container = docker.getContainer(id);
+        await container.restart();
+        res.status(200).json({
+            success: true,
+            message: "Container restarted successfully",
+            data: null,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to restart container",
+            error: error.message,
+        });
+    }
+};
+
 export const getContainerLogsHandler = async (req, res) => {
     try {
         const { id } = req.params;
@@ -163,9 +182,9 @@ export const spawnContainerHandler = async (req, res) => {
             ports.forEach((port) => {
                 const [containerPort, hostPort] = port.split(":");
                 containerConfig.ExposedPorts[`${containerPort}/tcp`] = {};
-                containerConfig.HostConfig.PortBindings[`${containerPort}/tcp`] = [
-                    { HostPort: hostPort },
-                ];
+                containerConfig.HostConfig.PortBindings[
+                    `${containerPort}/tcp`
+                ] = [{ HostPort: hostPort }];
             });
         }
 
@@ -173,7 +192,9 @@ export const spawnContainerHandler = async (req, res) => {
             volumes.forEach((volume) => {
                 const [hostPath, containerPath] = volume.split(":");
                 containerConfig.Volumes[containerPath] = {};
-                containerConfig.HostConfig.Binds = [`${hostPath}:${containerPath}`];
+                containerConfig.HostConfig.Binds = [
+                    `${hostPath}:${containerPath}`,
+                ];
             });
         }
 
@@ -183,7 +204,7 @@ export const spawnContainerHandler = async (req, res) => {
         const statsStream = await container.stats({ stream: true });
 
         statsStream.on("data", (stat) => {
-            console.log(stat)
+            console.log(stat);
             io.to(`container:${container.id}`).emit(
                 `container-stats:${container.id}`,
                 stat,

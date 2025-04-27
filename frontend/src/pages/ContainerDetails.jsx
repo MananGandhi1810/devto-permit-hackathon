@@ -23,13 +23,8 @@ function formatBytes(bytes) {
 }
 
 function cleanLogText(text) {
-    // Remove ANSI escape codes and trim excessive whitespace
     return text
-        .replace(
-            // eslint-disable-next-line no-control-regex
-            /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
-            "",
-        )
+        .replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, "")
         .replace(/\r/g, "")
         .replace(/\n{3,}/g, "\n\n")
         .trim();
@@ -56,7 +51,6 @@ function ContainerDetails() {
         });
     }, [id]);
 
-    // Listen for resource stats
     useEffect(() => {
         if (!container) return;
         const statsSocket = io(process.env.SERVER_URL, {
@@ -71,8 +65,7 @@ function ContainerDetails() {
                 const parsed =
                     typeof stat === "string" ? JSON.parse(stat) : stat;
                 setStats(parsed);
-            } catch {
-            }
+            } catch {}
         });
         return () => {
             statsSocket.emit("unsubscribeFromContainer", id);
@@ -146,7 +139,6 @@ function ContainerDetails() {
         try {
             await api.post(`/containers/${id}/${action}`);
             toast({ title: "Success", description: `Container ${action}ed` });
-            // Refresh container state after action
             const res = await api.get(`/containers`);
             const found = res.data.data.find((c) => c.Id === id);
             setContainer(found);
@@ -178,7 +170,6 @@ function ContainerDetails() {
     if (loading) return <div className="p-6">Loading...</div>;
     if (!container) return <div className="p-6">Container not found</div>;
 
-    // Exposed ports
     const ports = (container.Ports || []).filter(
         (p) => p.PublicPort || p.PrivatePort,
     );
@@ -192,110 +183,115 @@ function ContainerDetails() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-2">
-                        <span className="font-semibold">Status:</span>{" "}
-                        {container.State}
-                    </div>
-                    <div className="mb-2">
-                        <span className="font-semibold">Image:</span>{" "}
-                        {container.Image}
-                    </div>
-                    <div className="mb-2">
-                        <span className="font-semibold">ID:</span>{" "}
-                        {container.Id}
-                    </div>
-                    {ports.length > 0 && (
-                        <div className="mb-2">
-                            <span className="font-semibold">
-                                Exposed Ports:
-                            </span>
-                            <ul className="ml-2 list-disc">
-                                {ports.map((port, idx) => (
-                                    <li key={idx}>
-                                        {port.IP && <span>{port.IP}:</span>}
-                                        {port.PublicPort
-                                            ? `${port.PublicPort}->${port.PrivatePort}/${port.Type}`
-                                            : `${port.PrivatePort}/${port.Type}`}
-                                    </li>
-                                ))}
-                            </ul>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+                        <div>
+                            <span className="font-semibold">Status:</span>{" "}
+                            {container.State}
                         </div>
-                    )}
-                    {stats && (
-                        <div className="mb-2">
-                            <span className="font-semibold">
-                                Resource Usage:
-                            </span>
-                            <div className="ml-2">
-                                <div>
-                                    <span className="font-medium">CPU %: </span>
-                                    {stats.cpu_stats && stats.precpu_stats
-                                        ? (() => {
-                                              const cpuDelta =
-                                                  stats.cpu_stats.cpu_usage
-                                                      .total_usage -
-                                                  stats.precpu_stats.cpu_usage
-                                                      .total_usage;
-                                              const systemDelta =
-                                                  stats.cpu_stats
-                                                      .system_cpu_usage -
-                                                  stats.precpu_stats
-                                                      .system_cpu_usage;
-                                              const cpuPercent =
-                                                  systemDelta > 0 &&
-                                                  cpuDelta > 0
-                                                      ? (
-                                                            (cpuDelta /
-                                                                systemDelta) *
-                                                            stats.cpu_stats
-                                                                .online_cpus *
-                                                            100.0
-                                                        ).toFixed(2)
-                                                      : "0.00";
-                                              return cpuPercent;
-                                          })()
-                                        : "N/A"}
-                                </div>
-                                <div>
-                                    <span className="font-medium">
-                                        Memory:{" "}
-                                    </span>
-                                    {stats.memory_stats
-                                        ? `${formatBytes(
-                                              stats.memory_stats.usage,
-                                          )} / ${formatBytes(
-                                              stats.memory_stats.limit,
-                                          )}`
-                                        : "N/A"}
-                                </div>
-                                <div>
-                                    <span className="font-medium">
-                                        Network:{" "}
-                                    </span>
-                                    {stats.networks
-                                        ? Object.values(stats.networks)
-                                              .map((net, i) => (
-                                                  <span key={i}>
-                                                      RX:{" "}
-                                                      {formatBytes(
-                                                          net.rx_bytes,
-                                                      )}
-                                                      , TX:{" "}
-                                                      {formatBytes(
-                                                          net.tx_bytes,
-                                                      )}
-                                                  </span>
-                                              ))
-                                              .reduce((prev, curr) => [
-                                                  prev,
-                                                  " | ",
-                                                  curr,
-                                              ])
-                                        : "N/A"}
+                        <div>
+                            <span className="font-semibold">Image:</span>{" "}
+                            {container.Image}
+                        </div>
+                        <div>
+                            <span className="font-semibold">ID:</span>{" "}
+                            {container.Id}
+                        </div>
+                        {ports.length > 0 && (
+                            <div className="sm:col-span-2">
+                                <span className="font-semibold">
+                                    Exposed Ports:
+                                </span>
+                                <ul className="ml-2 list-disc">
+                                    {ports.map((port, idx) => (
+                                        <li key={idx}>
+                                            {port.IP && <span>{port.IP}:</span>}
+                                            {port.PublicPort
+                                                ? `${port.PublicPort}->${port.PrivatePort}/${port.Type}`
+                                                : `${port.PrivatePort}/${port.Type}`}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {container.State === "running" && stats && (
+                            <div className="sm:col-span-2">
+                                <span className="font-semibold">
+                                    Resource Usage:
+                                </span>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 ml-2">
+                                    <div>
+                                        <span className="font-medium">
+                                            CPU %:{" "}
+                                        </span>
+                                        {stats.cpu_stats && stats.precpu_stats
+                                            ? (() => {
+                                                  const cpuDelta =
+                                                      stats.cpu_stats.cpu_usage
+                                                          .total_usage -
+                                                      stats.precpu_stats
+                                                          .cpu_usage
+                                                          .total_usage;
+                                                  const systemDelta =
+                                                      stats.cpu_stats
+                                                          .system_cpu_usage -
+                                                      stats.precpu_stats
+                                                          .system_cpu_usage;
+                                                  const cpuPercent =
+                                                      systemDelta > 0 &&
+                                                      cpuDelta > 0
+                                                          ? (
+                                                                (cpuDelta /
+                                                                    systemDelta) *
+                                                                stats.cpu_stats
+                                                                    .online_cpus *
+                                                                100.0
+                                                            ).toFixed(2)
+                                                          : "0.00";
+                                                  return cpuPercent;
+                                              })()
+                                            : "N/A"}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">
+                                            Memory:{" "}
+                                        </span>
+                                        {stats.memory_stats
+                                            ? `${formatBytes(
+                                                  stats.memory_stats.usage,
+                                              )} / ${formatBytes(
+                                                  stats.memory_stats.limit,
+                                              )}`
+                                            : "N/A"}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">
+                                            Network:{" "}
+                                        </span>
+                                        {stats.networks
+                                            ? Object.values(stats.networks)
+                                                  .map((net, i) => (
+                                                      <span key={i}>
+                                                          RX:{" "}
+                                                          {formatBytes(
+                                                              net.rx_bytes,
+                                                          )}
+                                                          , TX:{" "}
+                                                          {formatBytes(
+                                                              net.tx_bytes,
+                                                          )}
+                                                      </span>
+                                                  ))
+                                                  .reduce((prev, curr) => [
+                                                      prev,
+                                                      " | ",
+                                                      curr,
+                                                  ])
+                                            : "N/A"}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </CardContent>
                 <CardFooter className="flex gap-2">
                     <Button
@@ -315,6 +311,15 @@ function ContainerDetails() {
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                     >
                         Stop
+                    </Button>
+                    <Button
+                        onClick={() => handleAction("restart")}
+                        disabled={
+                            actionLoading || container.State !== "running"
+                        }
+                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                        Restart
                     </Button>
                     <Button
                         onClick={() => handleAction("kill")}
