@@ -64,16 +64,16 @@ function ContainerDetails() {
             transports: ["websocket"],
         });
         statsSocket.emit("subscribeToContainer", id);
+        statsSocket.emit("getContainerStats", { id });
+
         statsSocket.on(`container-stats:${id}`, (stat) => {
             try {
                 const parsed =
                     typeof stat === "string" ? JSON.parse(stat) : stat;
                 setStats(parsed);
             } catch {
-                // ignore parse errors
             }
         });
-        // Backend will start streaming stats when container is spawned or running
         return () => {
             statsSocket.emit("unsubscribeFromContainer", id);
             statsSocket.disconnect();
@@ -231,7 +231,6 @@ function ContainerDetails() {
                                     <span className="font-medium">CPU %: </span>
                                     {stats.cpu_stats && stats.precpu_stats
                                         ? (() => {
-                                              // Docker stats calculation
                                               const cpuDelta =
                                                   stats.cpu_stats.cpu_usage
                                                       .total_usage -

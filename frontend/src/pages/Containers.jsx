@@ -172,6 +172,7 @@ function Containers() {
             <div className="grid gap-4 mt-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {containers.map((container) => (
                     <Card
+                        onClick={() => handleShowLogs(container.Id)}
                         key={container.Id}
                         className={`${getCardBg(container.State)} border-2 ${
                             container.State === "running"
@@ -189,7 +190,8 @@ function Containers() {
                                     to={`/containers/${container.Id}`}
                                     className="hover:underline text-white"
                                 >
-                                    {container.Names?.[0] || container.Id}
+                                    {container.Names?.[0].replace("/", "") ||
+                                        container.Id}
                                 </Link>
                             </CardTitle>
                         </CardHeader>

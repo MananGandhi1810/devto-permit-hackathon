@@ -3,6 +3,7 @@ import Docker from "dockerode";
 
 let io;
 const docker = new Docker();
+const statsStreams = {};
 
 const initializeSocket = (server) => {
     io = new Server(server, {
@@ -26,6 +27,53 @@ const initializeSocket = (server) => {
                 `User ${socket.id} unsubscribed from container ${containerId}`,
             );
             socket.leave(`container:${containerId}`);
+            const room = io.sockets.adapter.rooms.get(`container:${containerId}`);
+            if ((!room || room.size === 0) && statsStreams[containerId]) {
+                try {
+                    statsStreams[containerId].stream.destroy();
+                } catch {}
+                delete statsStreams[containerId];
+            }
+        });
+
+        socket.on("getContainerStats", async ({ id }) => {
+            try {
+                socket.join(`container:${id}`);
+                if (statsStreams[id]) {
+                    return;
+                }
+                const container = docker.getContainer(id);
+                const statsStream = await container.stats({ stream: true });
+                statsStreams[id] = {
+                    stream: statsStream,
+                };
+
+                statsStream.on("data", (stat) => {
+                    io.to(`container:${id}`).emit(`container-stats:${id}`, stat.toString());
+                });
+
+                statsStream.on("error", () => {
+                    if (statsStreams[id]) {
+                        try {
+                            statsStreams[id].stream.destroy();
+                        } catch {}
+                        delete statsStreams[id];
+                    }
+                });
+            } catch (e) {}
+        });
+
+        socket.on("disconnect", () => {
+            console.log("User disconnected", socket.id);
+            for (const [containerId, entry] of Object.entries(statsStreams)) {
+                const room = io.sockets.adapter.rooms.get(`container:${containerId}`);
+                if (!room || room.size === 0) {
+                    try {
+                        entry.stream.destroy();
+                    } catch {}
+                    delete statsStreams[containerId];
+                }
+            }
         });
 
         socket.on("container-exec", async ({ containerId }) => {
@@ -69,10 +117,6 @@ const initializeSocket = (server) => {
                 });
                 socket.emit("container-exit", { code: 1 });
             }
-        });
-
-        socket.on("disconnect", () => {
-            console.log("User disconnected", socket.id);
         });
     });
 };

@@ -65,18 +65,6 @@ export default function NavBar() {
                     >
                         Containers
                     </Link>
-                    <Link
-                        to="/containers/spawn"
-                        className="text-gray-100 hover:text-white relative after:bg-white after:absolute after:h-0.5 after:w-0 after:-bottom-1 after:left-0 hover:after:w-full after:transition-all duration-300"
-                    >
-                        Spawn
-                    </Link>
-                    <Link
-                        to="/about"
-                        className="text-gray-100 hover:text-white relative after:bg-white after:absolute after:h-0.5 after:w-0 after:-bottom-1 after:left-0 hover:after:w-full after:transition-all duration-300"
-                    >
-                        About
-                    </Link>
                 </nav>
                 <div className="absolute xl:right-44 right-4 flex items-center gap-4">
                     {!user.isAuthenticated ? (
@@ -154,18 +142,6 @@ export default function NavBar() {
                                     className="text-sm font-medium text-gray-100 hover:text-white"
                                 >
                                     Containers
-                                </Link>
-                                <Link
-                                    to="/containers/spawn"
-                                    className="text-sm font-medium text-gray-100 hover:text-white"
-                                >
-                                    Spawn
-                                </Link>
-                                <Link
-                                    to="/about"
-                                    className="text-sm font-medium text-gray-100 hover:text-white"
-                                >
-                                    About
                                 </Link>
                             </div>
                         </SheetContent>
