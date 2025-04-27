@@ -2,8 +2,10 @@ import express from "express";
 import cors from "cors";
 import authRouter from "./router/auth.js";
 import logger from "morgan";
+import containerRouter from "./router/container.js";
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -15,6 +17,7 @@ app.use(
 );
 
 app.use("/auth", authRouter);
+app.use("/containers", containerRouter);
 
 app.use(function (req, res, next) {
     res.status(404).json({
@@ -27,7 +30,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get("env") === "development" ? err : {};
-
+    req.error = err;
     res.status(err.status || 500).json({
         success: false,
         message: "An unexpected error occured",

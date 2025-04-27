@@ -60,6 +60,18 @@ export default function NavBar() {
                         Home
                     </Link>
                     <Link
+                        to="/containers"
+                        className="text-gray-100 hover:text-white relative after:bg-white after:absolute after:h-0.5 after:w-0 after:-bottom-1 after:left-0 hover:after:w-full after:transition-all duration-300"
+                    >
+                        Containers
+                    </Link>
+                    <Link
+                        to="/containers/spawn"
+                        className="text-gray-100 hover:text-white relative after:bg-white after:absolute after:h-0.5 after:w-0 after:-bottom-1 after:left-0 hover:after:w-full after:transition-all duration-300"
+                    >
+                        Spawn
+                    </Link>
+                    <Link
                         to="/about"
                         className="text-gray-100 hover:text-white relative after:bg-white after:absolute after:h-0.5 after:w-0 after:-bottom-1 after:left-0 hover:after:w-full after:transition-all duration-300"
                     >
@@ -136,6 +148,18 @@ export default function NavBar() {
                                     className="text-sm font-medium text-gray-100 hover:text-white"
                                 >
                                     Home
+                                </Link>
+                                <Link
+                                    to="/containers"
+                                    className="text-sm font-medium text-gray-100 hover:text-white"
+                                >
+                                    Containers
+                                </Link>
+                                <Link
+                                    to="/containers/spawn"
+                                    className="text-sm font-medium text-gray-100 hover:text-white"
+                                >
+                                    Spawn
                                 </Link>
                                 <Link
                                     to="/about"

@@ -15,6 +15,8 @@ import ForgotPassword from "@/pages/ForgotPassword.jsx";
 import VerifyOtp from "@/pages/VerifyOtp.jsx";
 import ResetPassword from "@/pages/ResetPassword.jsx";
 import NoPageFound from "@/pages/404.jsx";
+import Containers from "@/pages/Containers.jsx";
+import ContainerDetails from "@/pages/ContainerDetails.jsx";
 
 function App() {
     const initialState = {
@@ -126,6 +128,14 @@ function App() {
                         return null;
                     },
                     element: <ResetPassword />,
+                },
+                {
+                    path: "/containers",
+                    element: <Containers />,
+                },
+                {
+                    path: "/containers/:id",
+                    element: <ContainerDetails />,
                 },
                 {
                     path: "*",

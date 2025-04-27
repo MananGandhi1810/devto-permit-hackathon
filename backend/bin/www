@@ -9,6 +9,7 @@ import debug from "debug";
 import http from "http";
 import https from "https";
 import fs from "fs";
+import { initializeSocket } from "../socket.js";
 
 /**
  * Get port from environment and store in Express.
@@ -41,6 +42,7 @@ if (
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
+initializeSocket(server)
 
 /**
  * Normalize a port into a number, string, or false.
