@@ -175,11 +175,11 @@ function ContainerDetails() {
     );
 
     return (
-        <div className="p-6">
+        <div className="p-6 h-full-w-nav">
             <Card className="mb-4">
                 <CardHeader>
                     <CardTitle>
-                        {container.Names?.[0] || container.Id}
+                        {container.Names?.[0].replace("/", "") || container.Id}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>

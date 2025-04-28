@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { createClient } from "redis";
 import { generateOtp } from "../utils/generate_otp.js";
+import permit from "../utils/permit.js";
 
 dotenv.config();
 const jwtSecret = process.env.SECRET_KEY;
@@ -93,8 +94,9 @@ const verifyHandler = async (req, res) => {
             .status(500)
             .send("There was an error in verifying your account");
     }
+    let user;
     try {
-        await prisma.user.update({
+        user = await prisma.user.update({
             where: { id: jwtUser.id, email: jwtUser.email },
             data: { isVerified: true },
         });
@@ -103,6 +105,11 @@ const verifyHandler = async (req, res) => {
             .status(500)
             .send("There was an error in verifying your account");
     }
+    const response = await permit.api.syncUser({
+        key: user.id,
+        email: user.email,
+        role_assignments: ["viewer"],
+    });
     res.send(
         `Your account has been verified successfully. Click <a href="${
             req.protocol

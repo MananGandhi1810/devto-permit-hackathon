@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "dev": "nodemon ./bin/www",
-        "start": "node ./bin/www",
+        "dev": "nodemon --import=specifier-resolution-node/register bin/www",
+        "start": "node --import=specifier-resolution-node/register bin/www",
         "format": "prettier --write .",
         "docker:build": "docker build -t express-app:latest .",
         "test": "vitest"
@@ -27,7 +27,8 @@
         "permitio": "^2.7.4",
         "redis": "^4.7.0",
         "resend": "^4.0.0",
-        "socket.io": "^4.7.4"
+        "socket.io": "^4.7.4",
+        "specifier-resolution-node": "^1.1.4"
     },
     "devDependencies": {
         "nodemon": "^3.1.4",

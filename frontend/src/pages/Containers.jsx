@@ -105,7 +105,7 @@ function Containers() {
     };
 
     return (
-        <div className="p-6 bg-black min-h-screen text-white">
+        <div className="p-6 bg-black min-h-full-w-nav text-white">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Docker Containers</h2>
                 <Dialog open={showSpawn} onOpenChange={setShowSpawn}>
