@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { useParams } from "react-router-dom";
 import api from "@/lib/api";
 import {
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Terminal } from "xterm";
 import "xterm/css/xterm.css";
 import { io } from "socket.io-client";
+import AuthContext from "@/providers/auth-context";
 
 function formatBytes(bytes) {
     if (bytes === 0) return "0 B";
@@ -42,6 +43,16 @@ function ContainerDetails() {
     const logsSocketRef = useRef(null);
     const [activeTab, setActiveTab] = useState("terminal");
     const [stats, setStats] = useState(null);
+    const [permissions, setPermissions] = useState({
+        start: false,
+        stop: false,
+        restart: false,
+        kill: false,
+        remove: false,
+        "view-logs": false,
+    });
+    const { user } = useContext(AuthContext);
+    const [terminalAccess, setTerminalAccess] = useState(false);
 
     useEffect(() => {
         api.get(`/containers`).then((res) => {
@@ -52,10 +63,66 @@ function ContainerDetails() {
     }, [id]);
 
     useEffect(() => {
+        const checkPermissions = async () => {
+            const actions = [
+                "start",
+                "stop",
+                "restart",
+                "kill",
+                "remove",
+                "view-logs",
+                "exec",
+            ];
+            try {
+                const permissionResults = await Promise.all(
+                    actions.map(async (action) => {
+                        const res = await api.get(
+                            `/containers/check-permission?action=${action}`,
+                        );
+                        return { action, permitted: res.data.data.permitted };
+                    }),
+                );
+
+                const newPermissions = {};
+                let terminalPermitted = false;
+
+                permissionResults.forEach(({ action, permitted }) => {
+                    if (action === "exec") {
+                        terminalPermitted = permitted;
+                    } else {
+                        newPermissions[action] = permitted;
+                    }
+                });
+
+                setPermissions(newPermissions);
+                setTerminalAccess(terminalPermitted);
+            } catch (error) {
+                console.error("Failed to check permissions:", error);
+                const defaultPermissions = {
+                    start: false,
+                    stop: false,
+                    restart: false,
+                    kill: false,
+                    remove: false,
+                    "view-logs": false,
+                };
+                setPermissions(defaultPermissions);
+                setTerminalAccess(false);
+            }
+        };
+
+        checkPermissions();
+    }, []);
+
+    useEffect(() => {
         if (!container) return;
+        const token = user.token;
         const statsSocket = io(process.env.SERVER_URL, {
             path: "/socket.io",
             transports: ["websocket"],
+            auth: {
+                Authorization: `Bearer ${token}`,
+            },
         });
         statsSocket.emit("subscribeToContainer", id);
         statsSocket.emit("getContainerStats", { id });
@@ -87,9 +154,13 @@ function ContainerDetails() {
         });
         term.open(termRef.current);
 
+        const token = user.token;
         const socket = io(process.env.SERVER_URL, {
             path: "/socket.io",
             transports: ["websocket"],
+            auth: {
+                Authorization: `Bearer ${token}`,
+            },
         });
         socket.emit("container-exec", { containerId: id });
 
@@ -118,9 +189,13 @@ function ContainerDetails() {
 
     useEffect(() => {
         if (!container || activeTab !== "logs") return;
+        const token = user.token;
         const logsSocket = io(process.env.SERVER_URL, {
             path: "/socket.io",
             transports: ["websocket"],
+            auth: {
+                Authorization: `Bearer ${token}`,
+            },
         });
         logsSocket.emit("subscribeToContainer", id);
         logsSocket.on(`container-logs:${id}`, (log) => {
@@ -142,10 +217,15 @@ function ContainerDetails() {
             const res = await api.get(`/containers`);
             const found = res.data.data.find((c) => c.Id === id);
             setContainer(found);
-        } catch {
+        } catch (error) {
+            const description =
+                error.response?.status === 403
+                    ? "You do not have permission to perform this action."
+                    : `Failed to ${action} container`;
             toast({
                 title: "Error",
-                description: `Failed to ${action} container`,
+                description: description,
+                variant: "destructive",
             });
         }
         setActionLoading(false);
@@ -159,10 +239,15 @@ function ContainerDetails() {
                 description: "Container deleted successfully",
             });
             setContainer(null);
-        } catch {
+        } catch (error) {
+            const description =
+                error.response?.status === 403
+                    ? "You do not have permission to delete this container."
+                    : "Failed to delete container";
             toast({
                 title: "Error",
-                description: "Failed to delete container",
+                description: description,
+                variant: "destructive",
             });
         }
     };
@@ -297,7 +382,9 @@ function ContainerDetails() {
                     <Button
                         onClick={() => handleAction("start")}
                         disabled={
-                            actionLoading || container.State === "running"
+                            actionLoading ||
+                            container.State === "running" ||
+                            !permissions.start
                         }
                         className="bg-green-600 hover:bg-green-700 text-white"
                     >
@@ -306,7 +393,9 @@ function ContainerDetails() {
                     <Button
                         onClick={() => handleAction("stop")}
                         disabled={
-                            actionLoading || container.State !== "running"
+                            actionLoading ||
+                            container.State !== "running" ||
+                            !permissions.stop
                         }
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                     >
@@ -315,7 +404,9 @@ function ContainerDetails() {
                     <Button
                         onClick={() => handleAction("restart")}
                         disabled={
-                            actionLoading || container.State !== "running"
+                            actionLoading ||
+                            container.State !== "running" ||
+                            !permissions.restart
                         }
                         className="bg-blue-500 hover:bg-blue-600 text-white"
                     >
@@ -324,7 +415,9 @@ function ContainerDetails() {
                     <Button
                         onClick={() => handleAction("kill")}
                         disabled={
-                            actionLoading || container.State !== "running"
+                            actionLoading ||
+                            container.State !== "running" ||
+                            !permissions.kill
                         }
                         className="bg-red-600 hover:bg-red-700 text-white"
                     >
@@ -333,6 +426,7 @@ function ContainerDetails() {
                     <Button
                         variant="destructive"
                         onClick={handleDelete}
+                        disabled={!permissions.remove}
                         className="bg-gray-800 hover:bg-gray-900 text-white"
                     >
                         Delete Container
@@ -345,8 +439,11 @@ function ContainerDetails() {
                         activeTab === "terminal"
                             ? "bg-gray-800 text-white"
                             : "bg-gray-200 text-gray-700"
+                    } ${
+                        !terminalAccess ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                     onClick={() => setActiveTab("terminal")}
+                    disabled={!terminalAccess}
                 >
                     Terminal
                 </button>
@@ -355,8 +452,13 @@ function ContainerDetails() {
                         activeTab === "logs"
                             ? "bg-gray-800 text-white"
                             : "bg-gray-200 text-gray-700"
+                    } ${
+                        !permissions["view-logs"]
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                     }`}
                     onClick={() => setActiveTab("logs")}
+                    disabled={!permissions["view-logs"]}
                 >
                     Logs
                 </button>

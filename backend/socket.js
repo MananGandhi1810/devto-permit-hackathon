@@ -1,9 +1,16 @@
 import { Server } from "socket.io";
 import Docker from "dockerode";
+import permit from "./utils/permit";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 let io;
 const docker = new Docker();
 const statsStreams = {};
+const prisma = new PrismaClient();
 
 const initializeSocket = (server) => {
     io = new Server(server, {
@@ -12,14 +19,72 @@ const initializeSocket = (server) => {
         },
     });
 
+    io.use(async (socket, next) => {
+        const token = socket.handshake.auth.Authorization?.split(" ")[1];
+        console.log(token);
+
+        if (!token) {
+            return next(new Error("Authentication error: Missing token"));
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.SECRET_KEY);
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: decoded.id,
+                    email: decoded.email,
+                },
+            });
+
+            if (!user) {
+                return next(new Error("Authentication error: Invalid user"));
+            }
+
+            socket.request.user = user;
+            socket.permit = permit;
+            next();
+        } catch (error) {
+            console.error("JWT verification error:", error);
+            return next(new Error("Authentication error: Invalid token"));
+        }
+    });
+
     io.on("connection", (socket) => {
         console.log("A user connected", socket.id);
 
-        socket.on("subscribeToContainer", (containerId) => {
-            console.log(
-                `User ${socket.id} subscribed to container ${containerId}`,
-            );
-            socket.join(`container:${containerId}`);
+        socket.on("subscribeToContainer", async (containerId) => {
+            const userId = socket.request.user.id;
+            try {
+                const isPermitted = await socket.permit.check(
+                    userId,
+                    "view-logs",
+                    "Container",
+                );
+
+                if (!isPermitted) {
+                    console.log(
+                        `User ${socket.id} does not have permission to access container ${containerId}`,
+                    );
+                    socket.emit("subscriptionFailed", {
+                        message:
+                            "You do not have permission to access this container.",
+                    });
+                    return;
+                }
+
+                console.log(
+                    `User ${socket.id} subscribed to container ${containerId}`,
+                );
+                socket.join(`container:${containerId}`);
+            } catch (error) {
+                console.error(
+                    "Error checking permissions or subscribing to container:",
+                    error,
+                );
+                socket.emit("subscriptionFailed", {
+                    message: "Failed to subscribe to container.",
+                });
+            }
         });
 
         socket.on("unsubscribeFromContainer", (containerId) => {
@@ -27,7 +92,9 @@ const initializeSocket = (server) => {
                 `User ${socket.id} unsubscribed from container ${containerId}`,
             );
             socket.leave(`container:${containerId}`);
-            const room = io.sockets.adapter.rooms.get(`container:${containerId}`);
+            const room = io.sockets.adapter.rooms.get(
+                `container:${containerId}`,
+            );
             if ((!room || room.size === 0) && statsStreams[containerId]) {
                 try {
                     statsStreams[containerId].stream.destroy();
@@ -49,7 +116,10 @@ const initializeSocket = (server) => {
                 };
 
                 statsStream.on("data", (stat) => {
-                    io.to(`container:${id}`).emit(`container-stats:${id}`, stat.toString());
+                    io.to(`container:${id}`).emit(
+                        `container-stats:${id}`,
+                        stat.toString(),
+                    );
                 });
 
                 statsStream.on("error", () => {
@@ -66,7 +136,9 @@ const initializeSocket = (server) => {
         socket.on("disconnect", () => {
             console.log("User disconnected", socket.id);
             for (const [containerId, entry] of Object.entries(statsStreams)) {
-                const room = io.sockets.adapter.rooms.get(`container:${containerId}`);
+                const room = io.sockets.adapter.rooms.get(
+                    `container:${containerId}`,
+                );
                 if (!room || room.size === 0) {
                     try {
                         entry.stream.destroy();
@@ -77,6 +149,22 @@ const initializeSocket = (server) => {
         });
 
         socket.on("container-exec", async ({ containerId }) => {
+            const userId = socket.request.user.id;
+            const isPermitted = await socket.permit.check(
+                userId,
+                "execute-command",
+                "Container"
+            );
+
+            if (!isPermitted) {
+                console.log(
+                    `User ${socket.id} does not have permission to execute commands on container ${containerId}`
+                );
+                socket.emit("executionFailed", {
+                    message: "You do not have permission to execute commands on this container.",
+                });
+                return;
+            }
             try {
                 const container = docker.getContainer(containerId);
                 const exec = await container.exec({

@@ -1,6 +1,7 @@
 import Docker from "dockerode";
 import dotenv from "dotenv";
 import { io } from "../socket.js";
+import permit from "../utils/permit.js";
 
 dotenv.config();
 
@@ -239,3 +240,33 @@ export async function removeContainerHandler(req, res) {
         });
     }
 }
+
+export const checkContainerPermissionHandler = async (req, res) => {
+    try {
+        const { action } = req.query;
+        const userId = req.user.id;
+
+        if (!action) {
+            return res.status(400).json({
+                success: false,
+                message: "Action is required",
+                data: null,
+            });
+        }
+
+        const isPermitted = await permit.check(userId, action, "Container");
+
+        res.status(200).json({
+            success: true,
+            message: "Permission check completed",
+            data: { permitted: isPermitted },
+        });
+    } catch (error) {
+        console.error("Error checking permission:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to check permission",
+            error: error.message,
+        });
+    }
+};

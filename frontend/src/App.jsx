@@ -10,7 +10,7 @@ import Login from "@/pages/Login.jsx";
 import Register from "@/pages/Register.jsx";
 import AuthContext from "@/providers/auth-context.jsx";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 import ForgotPassword from "@/pages/ForgotPassword.jsx";
 import VerifyOtp from "@/pages/VerifyOtp.jsx";
 import ResetPassword from "@/pages/ResetPassword.jsx";
@@ -34,31 +34,37 @@ function App() {
     );
 
     const fetchUserData = async () => {
-        if (!user.isAuthenticated) {
+        if (!user.isAuthenticated || !user.token) {
             return;
         }
-        const res = await axios
-            .get(`${process.env.SERVER_URL}/auth/user`, {
-                headers: {
-                    authorization: `Bearer ${user.token}`,
-                },
-                validateStatus: false,
-            })
-            .then((res) => res.data);
-        if (!res.success) {
+        try {
+            const res = await api
+                .get(`/auth/user`, {
+                    validateStatus: false,
+                })
+                .then((res) => res.data);
+            if (!res.success) {
+                setUser(initialState);
+                localStorage.removeItem("user");
+                return;
+            }
+            setUser({
+                ...user,
+                id: res.data.id,
+                name: res.data.name,
+                email: res.data.email,
+            });
+        } catch (error) {
+            console.error("Failed to fetch user data:", error);
             setUser(initialState);
-            return;
+            localStorage.removeItem("user");
         }
-        setUser({
-            ...user,
-            id: res.data.id,
-            name: res.data.name,
-            email: res.data.email,
-        });
     };
 
     useEffect(() => {
-        fetchUserData();
+        if (user.isAuthenticated && user.token) {
+            fetchUserData();
+        }
     }, []);
 
     const router = createBrowserRouter([
@@ -148,10 +154,6 @@ function App() {
     useEffect(() => {
         localStorage.setItem("user", JSON.stringify(user));
     }, [user]);
-
-    useEffect(() => {
-        fetchUserData();
-    }, [user.isAuthenticated, user.token]);
 
     return (
         <div className="font-inter overflow-x-hidden">
