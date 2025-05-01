@@ -24,16 +24,15 @@
         "express": "^4.19.2",
         "jsonwebtoken": "^9.0.2",
         "morgan": "^1.10.0",
-        "permitio": "^2.7.4",
-        "redis": "^4.7.0",
-        "resend": "^4.0.0",
-        "socket.io": "^4.7.4",
-        "specifier-resolution-node": "^1.1.4"
+        "permitio": "^1.0.0",
+        "redis": "^4.6.12",
+        "resend": "^3.3.0",
+        "specifier-resolution-node": "^1.1.1"
     },
     "devDependencies": {
-        "nodemon": "^3.1.4",
-        "prettier": "^3.3.3",
-        "supertest": "^7.0.0",
-        "vitest": "^3.1.2"
+        "eslint": "^8.57.0",
+        "nodemon": "^3.1.0",
+        "prettier": "^3.2.5",
+        "vitest": "^1.4.0"
     }
 }

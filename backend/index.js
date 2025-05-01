@@ -3,6 +3,7 @@ import cors from "cors";
 import authRouter from "./router/auth.js";
 import logger from "morgan";
 import containerRouter from "./router/container.js";
+import adminRouter from "./router/admin.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.use(
 
 app.use("/auth", authRouter);
 app.use("/containers", containerRouter);
+app.use("/admin", adminRouter);
 
 app.use(function (req, res, next) {
     res.status(404).json({

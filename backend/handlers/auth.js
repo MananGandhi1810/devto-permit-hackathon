@@ -108,7 +108,11 @@ const verifyHandler = async (req, res) => {
     const response = await permit.api.syncUser({
         key: user.id,
         email: user.email,
-        role_assignments: ["viewer"],
+    });
+    await permit.api.roleAssignments.assign({
+        user: user.id,
+        role: "viewer",
+        tenant: "default",
     });
     res.send(
         `Your account has been verified successfully. Click <a href="${

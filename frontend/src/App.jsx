@@ -17,6 +17,7 @@ import ResetPassword from "@/pages/ResetPassword.jsx";
 import NoPageFound from "@/pages/404.jsx";
 import Containers from "@/pages/Containers.jsx";
 import ContainerDetails from "@/pages/ContainerDetails.jsx";
+import AdminDashboard from "@/pages/AdminDashboard.jsx";
 
 function App() {
     const initialState = {
@@ -66,6 +67,16 @@ function App() {
             fetchUserData();
         }
     }, []);
+
+    const checkAdminAccess = async () => {
+        try {
+            const response = await api.get('/admin/check-access');
+            return response.data.success;
+        } catch (error) {
+            console.error("Admin access check failed:", error);
+            return false;
+        }
+    };
 
     const router = createBrowserRouter([
         {
@@ -142,6 +153,22 @@ function App() {
                 {
                     path: "/containers/:id",
                     element: <ContainerDetails />,
+                },
+                {
+                    path: "/admin",
+                    loader: async () => {
+                        if (!user.isAuthenticated) {
+                            return redirect("/login?next=/admin");
+                        }
+                        
+                        const isAdmin = await checkAdminAccess();
+                        if (!isAdmin) {
+                            return redirect("/");
+                        }
+                        
+                        return null;
+                    },
+                    element: <AdminDashboard />,
                 },
                 {
                     path: "*",

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button.jsx";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet.jsx";
 import AuthContext from "@/providers/auth-context.jsx";
-import { ArrowRight, Speech } from "lucide-react";
-import { useContext, useEffect, useRef } from "react";
+import { ArrowRight, Speech, Shield } from "lucide-react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import {
@@ -17,11 +17,13 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import LoadingBar from "react-top-loading-bar";
+import api from "@/lib/api";
 
 export default function NavBar() {
     const { user, setUser } = useContext(AuthContext);
     const { state: navState } = useNavigation();
     const loaderRef = useRef(null);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         if (navState == "loading") {
@@ -30,6 +32,25 @@ export default function NavBar() {
             loaderRef.current.complete();
         }
     }, [navState]);
+
+    // Check if the user has admin permissions
+    useEffect(() => {
+        const checkAdminAccess = async () => {
+            if (!user.isAuthenticated) {
+                setIsAdmin(false);
+                return;
+            }
+
+            try {
+                const response = await api.get("/admin/check-access");
+                setIsAdmin(response.data.success);
+            } catch (error) {
+                setIsAdmin(false);
+            }
+        };
+
+        checkAdminAccess();
+    }, [user]);
 
     const logout = () => {
         setUser({
@@ -65,6 +86,14 @@ export default function NavBar() {
                     >
                         Containers
                     </Link>
+                    {isAdmin && (
+                        <Link
+                            to="/admin"
+                            className="text-gray-100 hover:text-white relative after:bg-white after:absolute after:h-0.5 after:w-0 after:-bottom-1 after:left-0 hover:after:w-full after:transition-all duration-300 flex items-center"
+                        >
+                            <Shield className="mr-1 h-4 w-4" /> Admin
+                        </Link>
+                    )}
                 </nav>
                 <div className="absolute xl:right-44 right-4 flex items-center gap-4">
                     {!user.isAuthenticated ? (
@@ -143,6 +172,15 @@ export default function NavBar() {
                                 >
                                     Containers
                                 </Link>
+                                {isAdmin && (
+                                    <Link
+                                        to="/admin"
+                                        className="text-sm font-medium text-gray-100 hover:text-white flex items-center"
+                                    >
+                                        <Shield className="mr-1 h-4 w-4" />{" "}
+                                        Admin
+                                    </Link>
+                                )}
                             </div>
                         </SheetContent>
                     </Sheet>
