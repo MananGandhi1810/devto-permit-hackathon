@@ -33,7 +33,6 @@ export default function NavBar() {
         }
     }, [navState]);
 
-    // Check if the user has admin permissions
     useEffect(() => {
         const checkAdminAccess = async () => {
             if (!user.isAuthenticated) {

@@ -3,6 +3,7 @@ import permit from "../utils/permit.js";
 const isAdmin = async (req, res, next) => {
     try {
         const userId = req.user.id;
+
         const isUserAdmin = (await permit.api.getAssignedRoles(userId))
             .map((r) => r.role)
             .includes("admin");

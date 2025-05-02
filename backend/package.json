@@ -27,6 +27,7 @@
         "permitio": "^1.0.0",
         "redis": "^4.6.12",
         "resend": "^3.3.0",
+        "socket.io": "^4.8.1",
         "specifier-resolution-node": "^1.1.1"
     },
     "devDependencies": {

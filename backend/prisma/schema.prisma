@@ -17,4 +17,17 @@ model User {
     createdAt         DateTime @default(now())
     updatedAt         DateTime @updatedAt
     passwordUpdatedAt DateTime @default(now())
+
+    AuditLog AuditLog[]
+}
+
+model AuditLog {
+    id        String   @id @default(cuid())
+    userId    String
+    action    String
+    resource  String
+    timestamp DateTime @default(now())
+    details   String?
+
+    user User @relation(fields: [userId], references: [id])
 }

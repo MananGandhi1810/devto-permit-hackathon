@@ -26,6 +26,7 @@ import AuthContext from "@/providers/auth-context";
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
+    const [auditLogs, setAuditLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updatingUserId, setUpdatingUserId] = useState(null);
     const [permissionError, setPermissionError] = useState(null);
@@ -33,7 +34,6 @@ function AdminDashboard() {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
 
-    // Fetch users and available roles
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -84,12 +84,27 @@ function AdminDashboard() {
         fetchData();
     }, [toast]);
 
+    useEffect(() => {
+        const fetchAuditLogs = async () => {
+            try {
+                const response = await api.get("/admin/audit-logs");
+                if (response.data.success) {
+                    setAuditLogs(response.data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching audit logs:", error);
+            }
+            setTimeout(() => {
+                fetchAuditLogs();
+            }, 5000);
+        };
+
+        fetchAuditLogs();
+    }, []);
+
     const handleRoleChange = async (userId, newRoles) => {
         try {
             setUpdatingUserId(userId);
-
-            // Since we're using checkboxes, ensure we have at least one role
-            // This is now handled on the backend, but we can provide a fallback here too
 
             const response = await api.post("/admin/users/role", {
                 userId,
@@ -124,7 +139,6 @@ function AdminDashboard() {
         }
     };
 
-    // Format date for display
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString();
     };
@@ -258,6 +272,58 @@ function AdminDashboard() {
                                         className="text-center text-gray-400"
                                     >
                                         No users found
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+            <Card className="bg-zinc-900 text-white border-zinc-700 mt-6">
+                <CardHeader>
+                    <CardTitle>Audit Logs</CardTitle>
+                    <CardDescription className="text-gray-400">
+                        View all system activities
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-zinc-700">
+                                <TableHead>User</TableHead>
+                                <TableHead>Action</TableHead>
+                                <TableHead>Resource</TableHead>
+                                <TableHead>Details</TableHead>
+                                <TableHead>Timestamp</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {auditLogs.length > 0 ? (
+                                auditLogs.map((log) => (
+                                    <TableRow
+                                        key={log.id}
+                                        className="border-zinc-700"
+                                    >
+                                        <TableCell>{log.user.email}</TableCell>
+                                        <TableCell>{log.action}</TableCell>
+                                        <TableCell>{log.resource}</TableCell>
+                                        <TableCell className="max-w-[200px] text-ellipsis overflow-clip">
+                                            {log.details || "N/A"}
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(
+                                                log.timestamp,
+                                            ).toLocaleString()}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-center text-gray-400"
+                                    >
+                                        No audit logs found
                                     </TableCell>
                                 </TableRow>
                             )}

@@ -173,3 +173,29 @@ export const getAvailableRolesHandler = async (req, res) => {
         });
     }
 };
+
+export const getAuditLogsHandler = async (req, res) => {
+    try {
+        const logs = await prisma.auditLog.findMany({
+            include: {
+                user: {
+                    select: { email: true },
+                },
+            },
+            orderBy: { timestamp: "desc" },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Audit logs retrieved successfully",
+            data: logs,
+        });
+    } catch (error) {
+        console.error("Error fetching audit logs:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve audit logs",
+            error: error.message,
+        });
+    }
+};
