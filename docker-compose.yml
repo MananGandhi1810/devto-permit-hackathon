@@ -1,6 +1,26 @@
-name: learning-management-system
+name: container-management-system
 
 services:
+    backend:
+        build: ./backend
+        restart: unless-stopped
+        ports:
+            - "3000:3000/tcp"
+        volumes:
+            - ./backend/.env.prod:/usr/src/app/.env
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./backend/access.log:/usr/src/app/access.log
+        user: root
+        command: sh -c "npx prisma migrate deploy && npm run start"
+
+    frontend:
+        build: ./frontend
+        restart: unless-stopped
+        ports:
+            - "8000:3000/tcp"
+        volumes:
+            - ./frontend/.env.prod:/usr/src/app/.env
+
     postgresql:
         image: bitnami/postgresql:latest
         restart: unless-stopped

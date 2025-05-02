@@ -1,6 +1,6 @@
 import Docker from "dockerode";
 import dotenv from "dotenv";
-import { io } from "../socket.js";
+import { io } from "../utils/socket.js";
 import permit from "../utils/permit.js";
 import { PrismaClient } from "@prisma/client";
 

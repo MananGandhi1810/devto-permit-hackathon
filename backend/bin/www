@@ -9,7 +9,7 @@ import debug from "debug";
 import http from "http";
 import https from "https";
 import fs from "fs";
-import { initializeSocket } from "../socket.js";
+import { initializeSocket } from "../utils/socket.js";
 
 /**
  * Get port from environment and store in Express.

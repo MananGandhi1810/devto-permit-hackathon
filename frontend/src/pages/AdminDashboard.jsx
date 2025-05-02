@@ -18,10 +18,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
-import AuthContext from "@/providers/auth-context";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 function AdminDashboard() {
@@ -33,7 +31,6 @@ function AdminDashboard() {
     const [permissionError, setPermissionError] = useState(null);
     const { toast } = useToast();
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -180,7 +177,9 @@ function AdminDashboard() {
                     <Tabs>
                         <TabsList>
                             <TabsTrigger value="users">Users</TabsTrigger>
-                            <TabsTrigger value="audit-logs">Audit Logs</TabsTrigger>
+                            <TabsTrigger value="audit-logs">
+                                Audit Logs
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="users">
                             <Table>
@@ -196,19 +195,27 @@ function AdminDashboard() {
                                 <TableBody>
                                     {users.length > 0 ? (
                                         users.map((u) => (
-                                            <TableRow key={u.id} className="border-zinc-700">
+                                            <TableRow
+                                                key={u.id}
+                                                className="border-zinc-700"
+                                            >
                                                 <TableCell className="flex flex-row align-middle h-full">
                                                     {u.name}{" "}
-                                                    {updatingUserId === u.id && (
+                                                    {updatingUserId ===
+                                                        u.id && (
                                                         <Loader2 className="h-4 w-4 animate-spin" />
                                                     )}
                                                 </TableCell>
                                                 <TableCell>{u.email}</TableCell>
                                                 <TableCell>
                                                     {u.isVerified ? (
-                                                        <span className="text-green-500">Verified</span>
+                                                        <span className="text-green-500">
+                                                            Verified
+                                                        </span>
                                                     ) : (
-                                                        <span className="text-yellow-500">Not Verified</span>
+                                                        <span className="text-yellow-500">
+                                                            Not Verified
+                                                        </span>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="min-w-[250px]">
@@ -220,15 +227,35 @@ function AdminDashboard() {
                                                             >
                                                                 <Checkbox
                                                                     id={`${u.id}-${role.value}`}
-                                                                    checked={u.roles.includes(role.value)}
-                                                                    onCheckedChange={(checked) => {
-                                                                        const newRoles = checked
-                                                                            ? [...u.roles, role.value]
-                                                                            : u.roles.filter((r) => r !== role.value);
-                                                                        handleRoleChange(u.id, newRoles);
+                                                                    checked={u.roles.includes(
+                                                                        role.value,
+                                                                    )}
+                                                                    onCheckedChange={(
+                                                                        checked,
+                                                                    ) => {
+                                                                        const newRoles =
+                                                                            checked
+                                                                                ? [
+                                                                                      ...u.roles,
+                                                                                      role.value,
+                                                                                  ]
+                                                                                : u.roles.filter(
+                                                                                      (
+                                                                                          r,
+                                                                                      ) =>
+                                                                                          r !==
+                                                                                          role.value,
+                                                                                  );
+                                                                        handleRoleChange(
+                                                                            u.id,
+                                                                            newRoles,
+                                                                        );
                                                                     }}
                                                                     className="border-white border-1"
-                                                                    disabled={updatingUserId === u.id}
+                                                                    disabled={
+                                                                        updatingUserId ===
+                                                                        u.id
+                                                                    }
                                                                 />
                                                                 <label
                                                                     htmlFor={`${u.id}-${role.value}`}
@@ -240,12 +267,17 @@ function AdminDashboard() {
                                                         ))}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>{formatDate(u.createdAt)}</TableCell>
+                                                <TableCell>
+                                                    {formatDate(u.createdAt)}
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center text-gray-400">
+                                            <TableCell
+                                                colSpan={5}
+                                                className="text-center text-gray-400"
+                                            >
                                                 No users found
                                             </TableCell>
                                         </TableRow>
@@ -267,21 +299,35 @@ function AdminDashboard() {
                                 <TableBody>
                                     {auditLogs.length > 0 ? (
                                         auditLogs.map((log) => (
-                                            <TableRow key={log.id} className="border-zinc-700">
-                                                <TableCell>{log.user.email}</TableCell>
-                                                <TableCell>{log.action}</TableCell>
-                                                <TableCell>{log.resource}</TableCell>
+                                            <TableRow
+                                                key={log.id}
+                                                className="border-zinc-700"
+                                            >
+                                                <TableCell>
+                                                    {log.user.email}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {log.action}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {log.resource}
+                                                </TableCell>
                                                 <TableCell className="max-w-[200px] text-ellipsis overflow-clip">
                                                     {log.details || "N/A"}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {new Date(log.timestamp).toLocaleString()}
+                                                    {new Date(
+                                                        log.timestamp,
+                                                    ).toLocaleString()}
                                                 </TableCell>
                                             </TableRow>
                                         ))
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center text-gray-400">
+                                            <TableCell
+                                                colSpan={5}
+                                                className="text-center text-gray-400"
+                                            >
                                                 No audit logs found
                                             </TableCell>
                                         </TableRow>

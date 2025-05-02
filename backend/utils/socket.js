@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import Docker from "dockerode";
-import permit from "./utils/permit";
+import permit from "./permit";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -153,15 +153,16 @@ const initializeSocket = (server) => {
             const isPermitted = await socket.permit.check(
                 userId,
                 "execute-command",
-                "Container"
+                "Container",
             );
 
             if (!isPermitted) {
                 console.log(
-                    `User ${socket.id} does not have permission to execute commands on container ${containerId}`
+                    `User ${socket.id} does not have permission to execute commands on container ${containerId}`,
                 );
                 socket.emit("executionFailed", {
-                    message: "You do not have permission to execute commands on this container.",
+                    message:
+                        "You do not have permission to execute commands on this container.",
                 });
                 return;
             }
