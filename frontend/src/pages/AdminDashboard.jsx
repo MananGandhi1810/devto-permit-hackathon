@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
 import AuthContext from "@/providers/auth-context";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -172,163 +173,123 @@ function AdminDashboard() {
                 <CardHeader>
                     <CardTitle>Admin Dashboard</CardTitle>
                     <CardDescription className="text-gray-400">
-                        Manage users and their roles
+                        Manage users and view system activities
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="border-zinc-700">
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Roles</TableHead>
-                                <TableHead>Created At</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {users.length > 0 ? (
-                                users.map((u) => (
-                                    <TableRow
-                                        key={u.id}
-                                        className="border-zinc-700"
-                                    >
-                                        <TableCell className="flex flex-row align-middle h-full">
-                                            {u.name}{" "}
-                                            {updatingUserId === u.id && (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            )}
-                                        </TableCell>
-                                        <TableCell>{u.email}</TableCell>
-                                        <TableCell>
-                                            {u.isVerified ? (
-                                                <span className="text-green-500">
-                                                    Verified
-                                                </span>
-                                            ) : (
-                                                <span className="text-yellow-500">
-                                                    Not Verified
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="min-w-[250px]">
-                                            <div className="flex flex-wrap gap-2">
-                                                {roles.map((role) => (
-                                                    <div
-                                                        key={role.value}
-                                                        className="flex items-center space-x-2 bg-zinc-800 p-2 rounded-md"
-                                                    >
-                                                        <Checkbox
-                                                            id={`${u.id}-${role.value}`}
-                                                            checked={u.roles.includes(
-                                                                role.value,
-                                                            )}
-                                                            onCheckedChange={(
-                                                                checked,
-                                                            ) => {
-                                                                const newRoles =
-                                                                    checked
-                                                                        ? [
-                                                                              ...u.roles,
-                                                                              role.value,
-                                                                          ]
-                                                                        : u.roles.filter(
-                                                                              (
-                                                                                  r,
-                                                                              ) =>
-                                                                                  r !==
-                                                                                  role.value,
-                                                                          );
-                                                                handleRoleChange(
-                                                                    u.id,
-                                                                    newRoles,
-                                                                );
-                                                            }}
-                                                            className="border-white border-1"
-                                                            disabled={
-                                                                updatingUserId ===
-                                                                u.id
-                                                            }
-                                                        />
-                                                        <label
-                                                            htmlFor={`${u.id}-${role.value}`}
-                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                                        >
-                                                            {role.label}
-                                                        </label>
+                    <Tabs>
+                        <TabsList>
+                            <TabsTrigger value="users">Users</TabsTrigger>
+                            <TabsTrigger value="audit-logs">Audit Logs</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="users">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-zinc-700">
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Roles</TableHead>
+                                        <TableHead>Created At</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {users.length > 0 ? (
+                                        users.map((u) => (
+                                            <TableRow key={u.id} className="border-zinc-700">
+                                                <TableCell className="flex flex-row align-middle h-full">
+                                                    {u.name}{" "}
+                                                    {updatingUserId === u.id && (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>{u.email}</TableCell>
+                                                <TableCell>
+                                                    {u.isVerified ? (
+                                                        <span className="text-green-500">Verified</span>
+                                                    ) : (
+                                                        <span className="text-yellow-500">Not Verified</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="min-w-[250px]">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {roles.map((role) => (
+                                                            <div
+                                                                key={role.value}
+                                                                className="flex items-center space-x-2 bg-zinc-800 p-2 rounded-md"
+                                                            >
+                                                                <Checkbox
+                                                                    id={`${u.id}-${role.value}`}
+                                                                    checked={u.roles.includes(role.value)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        const newRoles = checked
+                                                                            ? [...u.roles, role.value]
+                                                                            : u.roles.filter((r) => r !== role.value);
+                                                                        handleRoleChange(u.id, newRoles);
+                                                                    }}
+                                                                    className="border-white border-1"
+                                                                    disabled={updatingUserId === u.id}
+                                                                />
+                                                                <label
+                                                                    htmlFor={`${u.id}-${role.value}`}
+                                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                                >
+                                                                    {role.label}
+                                                                </label>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {formatDate(u.createdAt)}
-                                        </TableCell>
+                                                </TableCell>
+                                                <TableCell>{formatDate(u.createdAt)}</TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center text-gray-400">
+                                                No users found
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+                        <TabsContent value="audit-logs">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-zinc-700">
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Action</TableHead>
+                                        <TableHead>Resource</TableHead>
+                                        <TableHead>Details</TableHead>
+                                        <TableHead>Timestamp</TableHead>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={5}
-                                        className="text-center text-gray-400"
-                                    >
-                                        No users found
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-            <Card className="bg-zinc-900 text-white border-zinc-700 mt-6">
-                <CardHeader>
-                    <CardTitle>Audit Logs</CardTitle>
-                    <CardDescription className="text-gray-400">
-                        View all system activities
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="border-zinc-700">
-                                <TableHead>User</TableHead>
-                                <TableHead>Action</TableHead>
-                                <TableHead>Resource</TableHead>
-                                <TableHead>Details</TableHead>
-                                <TableHead>Timestamp</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {auditLogs.length > 0 ? (
-                                auditLogs.map((log) => (
-                                    <TableRow
-                                        key={log.id}
-                                        className="border-zinc-700"
-                                    >
-                                        <TableCell>{log.user.email}</TableCell>
-                                        <TableCell>{log.action}</TableCell>
-                                        <TableCell>{log.resource}</TableCell>
-                                        <TableCell className="max-w-[200px] text-ellipsis overflow-clip">
-                                            {log.details || "N/A"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {new Date(
-                                                log.timestamp,
-                                            ).toLocaleString()}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={5}
-                                        className="text-center text-gray-400"
-                                    >
-                                        No audit logs found
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {auditLogs.length > 0 ? (
+                                        auditLogs.map((log) => (
+                                            <TableRow key={log.id} className="border-zinc-700">
+                                                <TableCell>{log.user.email}</TableCell>
+                                                <TableCell>{log.action}</TableCell>
+                                                <TableCell>{log.resource}</TableCell>
+                                                <TableCell className="max-w-[200px] text-ellipsis overflow-clip">
+                                                    {log.details || "N/A"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {new Date(log.timestamp).toLocaleString()}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center text-gray-400">
+                                                No audit logs found
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
             </Card>
         </div>
