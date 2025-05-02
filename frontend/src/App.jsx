@@ -70,7 +70,7 @@ function App() {
 
     const checkAdminAccess = async () => {
         try {
-            const response = await api.get('/admin/check-access');
+            const response = await api.get("/admin/check-access");
             return response.data.success;
         } catch (error) {
             console.error("Admin access check failed:", error);
@@ -148,6 +148,18 @@ function App() {
                 },
                 {
                     path: "/containers",
+                    loader: async () => {
+                        if (!user.isAuthenticated) {
+                            return redirect("/login?next=/containers");
+                        }
+
+                        const isAdmin = await checkAdminAccess();
+                        if (!isAdmin) {
+                            return redirect("/");
+                        }
+
+                        return null;
+                    },
                     element: <Containers />,
                 },
                 {
@@ -160,12 +172,12 @@ function App() {
                         if (!user.isAuthenticated) {
                             return redirect("/login?next=/admin");
                         }
-                        
+
                         const isAdmin = await checkAdminAccess();
                         if (!isAdmin) {
                             return redirect("/");
                         }
-                        
+
                         return null;
                     },
                     element: <AdminDashboard />,
