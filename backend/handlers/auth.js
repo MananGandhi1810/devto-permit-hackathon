@@ -41,8 +41,7 @@ const registerHandler = async (req, res) => {
     if (!validatePassword(password)) {
         return res.status(400).json({
             success: false,
-            message:
-                "The password must contain at least 8 characters",
+            message: "The password must contain at least 8 characters",
             data: null,
         });
     }
@@ -109,7 +108,7 @@ const verifyHandler = async (req, res) => {
         key: user.id,
         email: user.email,
     });
-    await permit.api.roleAssignments.assign({
+    await permit.api.assignRole({
         user: user.id,
         role: "viewer",
         tenant: "default",
