@@ -11,13 +11,46 @@ const docker = new Docker();
 const DEMO_MODE = process.env.DEMO_MODE === "true";
 const MAX_CONTAINERS = 10;
 
+const SYSTEM_IMAGES = [
+    "ghcr.io/manangandhi1810/dockersensei-backend:latest",
+    "ghcr.io/manangandhi1810/dockersensei-frontend:latest",
+];
+const SYSTEM_NAMES = ["dockersensei-postgresql-1", "dockersensei-redis-1"];
+
+const isSystemContainer = (container) => {
+    if (
+        SYSTEM_IMAGES.some(
+            (image) =>
+                container.Image === image ||
+                container.Image.startsWith(image.split(":")[0]),
+        )
+    ) {
+        return true;
+    }
+
+    if (
+        SYSTEM_NAMES.some((name) => {
+            const containerName = container.Names[0]?.replace(/^\//, "");
+            return containerName === name;
+        })
+    ) {
+        return true;
+    }
+
+    return false;
+};
+
 export const listContainersHandler = async (req, res) => {
     try {
-        const containers = await docker.listContainers({ all: true });
+        const allContainers = await docker.listContainers({ all: true });
+        const userContainers = allContainers.filter(
+            (container) => !isSystemContainer(container),
+        );
+
         res.status(200).json({
             success: true,
             message: "Containers listed successfully",
-            data: containers,
+            data: userContainers,
         });
     } catch (error) {
         res.status(500).json({
@@ -192,7 +225,6 @@ export const spawnContainerHandler = async (req, res) => {
         });
     }
 
-    // Check container limit if in demo mode
     if (DEMO_MODE) {
         const containers = await docker.listContainers({ all: true });
         if (containers.length >= MAX_CONTAINERS) {
@@ -363,15 +395,18 @@ export const checkContainerLimitHandler = async (req, res) => {
             });
         }
 
-        const containers = await docker.listContainers({ all: true });
-        const limitReached = containers.length >= MAX_CONTAINERS;
+        const allContainers = await docker.listContainers({ all: true });
+        const userContainers = allContainers.filter(
+            (container) => !isSystemContainer(container),
+        );
+        const limitReached = userContainers.length >= MAX_CONTAINERS;
 
         res.status(200).json({
             success: true,
             demoMode: true,
             limitReached,
             maxContainers: MAX_CONTAINERS,
-            currentCount: containers.length,
+            currentCount: userContainers.length,
         });
     } catch (error) {
         console.error("Error checking container limit:", error);

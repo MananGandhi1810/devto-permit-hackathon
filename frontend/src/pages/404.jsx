@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { CircleX } from "lucide-react";
 
 function NoPageFound() {
     return (
