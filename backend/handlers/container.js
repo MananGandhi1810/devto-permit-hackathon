@@ -371,7 +371,7 @@ export const checkContainerLimitHandler = async (req, res) => {
             demoMode: true,
             limitReached,
             maxContainers: MAX_CONTAINERS,
-            currentCount: containers.length
+            currentCount: containers.length,
         });
     } catch (error) {
         console.error("Error checking container limit:", error);

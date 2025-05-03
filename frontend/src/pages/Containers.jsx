@@ -230,10 +230,10 @@ function Containers() {
                                     container.State === "running"
                                         ? "border-green-400"
                                         : container.State === "exited"
-                                        ? "border-red-400"
-                                        : container.State === "paused"
-                                        ? "border-yellow-400"
-                                        : "border-gray-700"
+                                          ? "border-red-400"
+                                          : container.State === "paused"
+                                            ? "border-yellow-400"
+                                            : "border-gray-700"
                                 } bg-zinc-900 text-white`}
                             >
                                 <CardHeader className="flex flex-row justify-between items-center">

@@ -96,10 +96,6 @@ router.delete(
     removeContainerHandler,
 );
 
-router.get(
-    "/check-permission",
-    checkAuth,
-    checkContainerPermissionHandler,
-);
+router.get("/check-permission", checkAuth, checkContainerPermissionHandler);
 
 export default router;

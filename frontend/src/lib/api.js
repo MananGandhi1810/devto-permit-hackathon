@@ -4,7 +4,7 @@ const api = axios.create({
     baseURL: process.env.SERVER_URL,
     withCredentials: false,
     headers: {},
-    validateStatus: false
+    validateStatus: false,
 });
 
 api.interceptors.request.use(
