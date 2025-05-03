@@ -42,7 +42,7 @@ const registerHandler = async (req, res) => {
         return res.status(400).json({
             success: false,
             message:
-                "The password must contain 8 letters, with 1 symbol, 1 lower case character, 1 upper case character, and 1 number",
+                "The password must contain at least 8 characters",
             data: null,
         });
     }
