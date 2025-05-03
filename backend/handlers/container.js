@@ -7,8 +7,9 @@ import { PrismaClient } from "@prisma/client";
 dotenv.config();
 
 const prisma = new PrismaClient();
-
 const docker = new Docker();
+const DEMO_MODE = process.env.DEMO_MODE === "true";
+const MAX_CONTAINERS = 10;
 
 export const listContainersHandler = async (req, res) => {
     try {
@@ -191,6 +192,19 @@ export const spawnContainerHandler = async (req, res) => {
         });
     }
 
+    // Check container limit if in demo mode
+    if (DEMO_MODE) {
+        const containers = await docker.listContainers({ all: true });
+        if (containers.length >= MAX_CONTAINERS) {
+            return res.status(403).json({
+                success: false,
+                message: "Demo mode: Maximum container limit (10) reached",
+                data: null,
+                demoLimit: true,
+            });
+        }
+    }
+
     let imageExists = true;
     try {
         await docker.getImage(image).inspect();
@@ -333,6 +347,37 @@ export const checkContainerPermissionHandler = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to check permission",
+            error: error.message,
+        });
+    }
+};
+
+export const checkContainerLimitHandler = async (req, res) => {
+    try {
+        if (!DEMO_MODE) {
+            return res.status(200).json({
+                success: true,
+                demoMode: false,
+                limitReached: false,
+                maxContainers: null,
+            });
+        }
+
+        const containers = await docker.listContainers({ all: true });
+        const limitReached = containers.length >= MAX_CONTAINERS;
+
+        res.status(200).json({
+            success: true,
+            demoMode: true,
+            limitReached,
+            maxContainers: MAX_CONTAINERS,
+            currentCount: containers.length
+        });
+    } catch (error) {
+        console.error("Error checking container limit:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to check container limit",
             error: error.message,
         });
     }

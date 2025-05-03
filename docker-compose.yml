@@ -2,7 +2,7 @@ name: dockersensei
 
 services:
     backend:
-        build: ./backend
+        image: ghcr.io/manangandhi1810/dockersensei-backend:latest
         restart: unless-stopped
         ports:
             - "3000:3000/tcp"
@@ -14,7 +14,7 @@ services:
         command: sh -c "npx prisma migrate deploy && npm run start"
 
     frontend:
-        build: ./frontend
+        image: ghcr.io/manangandhi1810/dockersensei-frontend:latest
         restart: unless-stopped
         ports:
             - "8000:3000/tcp"

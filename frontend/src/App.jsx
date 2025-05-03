@@ -160,7 +160,13 @@ function App() {
                     path: "/containers/:id",
                     loader: async () => {
                         if (!user.isAuthenticated) {
-                            return redirect(`/login?next=/containers/${new URL(window.location.href).pathname.split('/').pop()}`);
+                            return redirect(
+                                `/login?next=/containers/${new URL(
+                                    window.location.href,
+                                ).pathname
+                                    .split("/")
+                                    .pop()}`,
+                            );
                         }
                         return null;
                     },
