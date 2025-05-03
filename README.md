@@ -1,8 +1,8 @@
-# Docker Container Management System
+# DockerSensei
 
 ## Overview
 
-The Docker Container Management System is a robust platform designed to manage Docker containers with fine-grained access control. It leverages **Permit.io** for Role-Based Access Control (RBAC), ensuring secure and scalable permission management.
+DockerSensei is a robust platform designed to manage Docker containers with fine-grained access control. It leverages **Permit.io** for Role-Based Access Control (RBAC), ensuring secure and scalable permission management.
 
 ## Features
 
@@ -91,8 +91,8 @@ The system includes the following predefined roles with specific permissions:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/MananGandhi1810/container-management-rbac.git
-    cd container-management-rbac
+    git clone https://github.com/MananGandhi1810/dockersensei.git
+    cd dockersensei
     ```
 
 2. Set up the environment variables:

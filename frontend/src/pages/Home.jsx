@@ -53,9 +53,9 @@ function Home() {
             ))}
             
             <div className="relative z-10 flex flex-col items-center justify-center p-8 h-full-w-nav">
-                <h1 className="text-4xl font-bold mb-4">Docker Container Management</h1>
+                <h1 className="text-4xl font-bold mb-4">DockerSensei</h1>
                 <p className="text-lg text-gray-400 mb-8 text-center max-w-md">
-                    Manage your Docker containers with robust role-based access control
+                    Master your Docker containers with intelligent role-based access control
                 </p>
                 
                 {user.isAuthenticated ? (

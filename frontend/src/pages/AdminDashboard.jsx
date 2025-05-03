@@ -45,7 +45,6 @@ function AdminDashboard() {
                     setUsers(usersResponse.data.data);
                     setPermissionError(null);
                 }
-                console.log(usersResponse.data.data);
 
                 if (rolesResponse.data.success) {
                     setRoles(

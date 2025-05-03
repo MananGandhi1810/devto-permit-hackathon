@@ -70,7 +70,7 @@ export default function NavBar() {
                     to="/"
                     className="absolute xl:left-44 left-4 flex items-center gap-2"
                 >
-                    <span className="font-medium text-white">Project Name</span>
+                    <span className="font-medium text-white">DockerSensei</span>
                 </Link>
                 <nav className="hidden md:flex items-center gap-6 justify-center text-sm font-medium w-full">
                     <Link

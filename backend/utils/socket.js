@@ -21,7 +21,6 @@ const initializeSocket = (server) => {
 
     io.use(async (socket, next) => {
         const token = socket.handshake.auth.Authorization?.split(" ")[1];
-        console.log(token);
 
         if (!token) {
             return next(new Error("Authentication error: Missing token"));
@@ -50,8 +49,6 @@ const initializeSocket = (server) => {
     });
 
     io.on("connection", (socket) => {
-        console.log("A user connected", socket.id);
-
         socket.on("subscribeToContainer", async (containerId) => {
             const userId = socket.request.user.id;
             try {
@@ -62,19 +59,12 @@ const initializeSocket = (server) => {
                 );
 
                 if (!isPermitted) {
-                    console.log(
-                        `User ${socket.id} does not have permission to access container ${containerId}`,
-                    );
                     socket.emit("subscriptionFailed", {
                         message:
                             "You do not have permission to access this container.",
                     });
                     return;
                 }
-
-                console.log(
-                    `User ${socket.id} subscribed to container ${containerId}`,
-                );
                 socket.join(`container:${containerId}`);
             } catch (error) {
                 console.error(
@@ -88,9 +78,6 @@ const initializeSocket = (server) => {
         });
 
         socket.on("unsubscribeFromContainer", (containerId) => {
-            console.log(
-                `User ${socket.id} unsubscribed from container ${containerId}`,
-            );
             socket.leave(`container:${containerId}`);
             const room = io.sockets.adapter.rooms.get(
                 `container:${containerId}`,
@@ -134,7 +121,6 @@ const initializeSocket = (server) => {
         });
 
         socket.on("disconnect", () => {
-            console.log("User disconnected", socket.id);
             for (const [containerId, entry] of Object.entries(statsStreams)) {
                 const room = io.sockets.adapter.rooms.get(
                     `container:${containerId}`,
@@ -152,14 +138,11 @@ const initializeSocket = (server) => {
             const userId = socket.request.user.id;
             const isPermitted = await socket.permit.check(
                 userId,
-                "execute-command",
+                "exec",
                 "Container",
             );
 
             if (!isPermitted) {
-                console.log(
-                    `User ${socket.id} does not have permission to execute commands on container ${containerId}`,
-                );
                 socket.emit("executionFailed", {
                     message:
                         "You do not have permission to execute commands on this container.",

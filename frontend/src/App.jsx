@@ -152,18 +152,18 @@ function App() {
                         if (!user.isAuthenticated) {
                             return redirect("/login?next=/containers");
                         }
-
-                        const isAdmin = await checkAdminAccess();
-                        if (!isAdmin) {
-                            return redirect("/");
-                        }
-
                         return null;
                     },
                     element: <Containers />,
                 },
                 {
                     path: "/containers/:id",
+                    loader: async () => {
+                        if (!user.isAuthenticated) {
+                            return redirect(`/login?next=/containers/${new URL(window.location.href).pathname.split('/').pop()}`);
+                        }
+                        return null;
+                    },
                     element: <ContainerDetails />,
                 },
                 {

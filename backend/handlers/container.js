@@ -261,7 +261,6 @@ export const spawnContainerHandler = async (req, res) => {
         const statsStream = await container.stats({ stream: true });
 
         statsStream.on("data", (stat) => {
-            console.log(stat);
             io.to(`container:${container.id}`).emit(
                 `container-stats:${container.id}`,
                 stat,
