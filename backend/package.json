@@ -24,7 +24,7 @@
         "express": "^4.19.2",
         "jsonwebtoken": "^9.0.2",
         "morgan": "^1.10.0",
-        "permitio": "^1.0.0",
+        "permitio": "^2.7.4",
         "redis": "^4.6.12",
         "resend": "^3.3.0",
         "socket.io": "^4.8.1",
