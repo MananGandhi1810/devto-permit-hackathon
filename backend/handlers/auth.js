@@ -64,7 +64,7 @@ const registerHandler = async (req, res) => {
         email,
         "Verify",
         `<h1>Please verify</h1>
-Please verify your account on {APP_NAME} by clicking on this <a href="${url}">link</a>.
+Please verify your account on DockerSensei by clicking on this <a href="${url}">link</a>.
 Alternatively, you can visit this URL: ${url}`,
     );
     res.json({
@@ -116,7 +116,7 @@ const verifyHandler = async (req, res) => {
     res.send(
         `Your account has been verified successfully. Click <a href="${
             req.protocol
-        }://${req.get("host")}/">here</a> to go to {APP_NAME}`,
+        }://${req.get("host")}/">here</a> to go to DockerSensei`,
     );
 };
 
@@ -216,7 +216,7 @@ const resendVerificationHandler = async (req, res) => {
         email,
         "Verify",
         `<h1>Please verify</h1>
-Please verify your account on {APP_NAME} by clicking on this <a href="${url}">link</a>.
+Please verify your account on DockerSensei by clicking on this <a href="${url}">link</a>.
 Alternatively, you can visit this URL: ${url}`,
     );
     res.json({

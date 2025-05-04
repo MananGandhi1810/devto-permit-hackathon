@@ -32,7 +32,10 @@ function UsersTable({ users, roles, onUserUpdate }) {
                 });
 
                 if (onUserUpdate) {
-                    const updatedUser = { ...users.find(u => u.id === userId), roles: newRoles };
+                    const updatedUser = {
+                        ...users.find((u) => u.id === userId),
+                        roles: newRoles,
+                    };
                     onUserUpdate(updatedUser);
                 }
             }
@@ -68,10 +71,7 @@ function UsersTable({ users, roles, onUserUpdate }) {
             <TableBody>
                 {users.length > 0 ? (
                     users.map((u) => (
-                        <TableRow
-                            key={u.id}
-                            className="border-zinc-700"
-                        >
+                        <TableRow key={u.id} className="border-zinc-700">
                             <TableCell className="flex flex-row align-middle h-full">
                                 {u.name}{" "}
                                 {updatingUserId === u.id && (
@@ -102,20 +102,17 @@ function UsersTable({ users, roles, onUserUpdate }) {
                                                 checked={u.roles.includes(
                                                     role.value,
                                                 )}
-                                                onCheckedChange={(
-                                                    checked,
-                                                ) => {
-                                                    const newRoles =
-                                                        checked
-                                                            ? [
-                                                                ...u.roles,
-                                                                role.value,
-                                                            ]
-                                                            : u.roles.filter(
-                                                                (r) =>
-                                                                    r !==
-                                                                    role.value,
-                                                            );
+                                                onCheckedChange={(checked) => {
+                                                    const newRoles = checked
+                                                        ? [
+                                                              ...u.roles,
+                                                              role.value,
+                                                          ]
+                                                        : u.roles.filter(
+                                                              (r) =>
+                                                                  r !==
+                                                                  role.value,
+                                                          );
                                                     handleRoleChange(
                                                         u.id,
                                                         newRoles,
@@ -136,9 +133,7 @@ function UsersTable({ users, roles, onUserUpdate }) {
                                     ))}
                                 </div>
                             </TableCell>
-                            <TableCell>
-                                {formatDate(u.createdAt)}
-                            </TableCell>
+                            <TableCell>{formatDate(u.createdAt)}</TableCell>
                         </TableRow>
                     ))
                 ) : (
