@@ -114,9 +114,7 @@ const verifyHandler = async (req, res) => {
         tenant: "default",
     });
     res.send(
-        `Your account has been verified successfully. Click <a href="${
-            req.protocol
-        }://${req.get("host")}/">here</a> to go to DockerSensei`,
+        `Your account has been verified successfully. Click <a href="https://dockersensei.rushabhjaveri.com/login">here</a> to go to DockerSensei`,
     );
 };
 
