@@ -91,6 +91,14 @@ function AdminDashboard() {
         fetchAuditLogs();
     }, []);
 
+    const handleUserUpdate = (updatedUser) => {
+        setUsers((prevUsers) =>
+            prevUsers.map((user) =>
+                user.id === updatedUser.id ? updatedUser : user,
+            ),
+        );
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex justify-center items-center h-full-w-nav">
@@ -132,7 +140,11 @@ function AdminDashboard() {
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="users">
-                            <UsersTable users={users} roles={roles} />
+                            <UsersTable
+                                users={users}
+                                roles={roles}
+                                onUserUpdate={handleUserUpdate}
+                            />
                         </TabsContent>
                         <TabsContent value="audit-logs">
                             <AuditLogs logs={auditLogs} />

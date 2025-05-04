@@ -43,9 +43,22 @@ function Containers() {
     const [permissionError, setPermissionError] = useState(null);
     const [logs, setLogs] = useState({});
     const [showLogs, setShowLogs] = useState({});
+    const [canSpawn, setCanSpawn] = useState(false);
     const pollRef = useRef();
 
     const { toast } = useToast();
+
+    const checkSpawnPermission = async () => {
+        try {
+            const res = await api.get(
+                "/containers/check-permission?action=spawn",
+            );
+            setCanSpawn(res.data.data?.permitted || false);
+        } catch (error) {
+            console.error("Failed to check spawn permission:", error);
+            setCanSpawn(false);
+        }
+    };
 
     const fetchContainers = async () => {
         try {
@@ -76,6 +89,8 @@ function Containers() {
 
     useEffect(() => {
         fetchContainers();
+        checkSpawnPermission();
+
         const timerId = setTimeout(() => {
             if (!permissionError && !pollRef.current) {
                 pollRef.current = setInterval(fetchContainers, 5000);
@@ -150,6 +165,12 @@ function Containers() {
                             <Button
                                 onClick={() => setShowSpawn(true)}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={!canSpawn}
+                                title={
+                                    !canSpawn
+                                        ? "You don't have permission to spawn containers"
+                                        : ""
+                                }
                             >
                                 + Spawn Container
                             </Button>
@@ -230,10 +251,10 @@ function Containers() {
                                     container.State === "running"
                                         ? "border-green-400"
                                         : container.State === "exited"
-                                          ? "border-red-400"
-                                          : container.State === "paused"
-                                            ? "border-yellow-400"
-                                            : "border-gray-700"
+                                        ? "border-red-400"
+                                        : container.State === "paused"
+                                        ? "border-yellow-400"
+                                        : "border-gray-700"
                                 } bg-zinc-900 text-white`}
                             >
                                 <CardHeader className="flex flex-row justify-between items-center">

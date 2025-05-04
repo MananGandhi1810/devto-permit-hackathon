@@ -12,7 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import api from "@/lib/api";
 
-function UsersTable({ users, roles }) {
+function UsersTable({ users, roles, onUserUpdate }) {
     const [updatingUserId, setUpdatingUserId] = useState(null);
     const { toast } = useToast();
 
@@ -26,11 +26,15 @@ function UsersTable({ users, roles }) {
             });
 
             if (response.data.success) {
-                // Update users through parent component
                 toast({
                     title: "Success",
                     description: "User roles updated successfully",
                 });
+
+                if (onUserUpdate) {
+                    const updatedUser = { ...users.find(u => u.id === userId), roles: newRoles };
+                    onUserUpdate(updatedUser);
+                }
             }
         } catch (error) {
             console.error("Error updating role:", error);
