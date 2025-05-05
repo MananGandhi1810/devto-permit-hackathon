@@ -91,7 +91,7 @@ The system includes the following predefined roles with specific permissions:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/MananGandhi1810/dockersensei.git
+    git clone https://github.com/MananGandhi1810/devto-permit-hackathon.git
     cd dockersensei
     ```
 
