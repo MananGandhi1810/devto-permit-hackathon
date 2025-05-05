@@ -49,18 +49,19 @@ The system includes the following predefined roles with specific permissions:
     -   Cannot start, stop, restart, or execute commands on containers.
 
 -   **Viewer**:
+    -   Can only view list of containers.
     -   No permissions to perform any actions.
 
 ## Tech Stack
 
 ### Backend
 
--   **Node.js**: JavaScript runtime for building scalable server-side applications.
--   **Express.js**: Web framework for building RESTful APIs.
--   **Prisma**: ORM for database management and migrations.
--   **PostgreSQL**: Relational database for storing application data.
--   **Permit.io**: Access control and RBAC solution for managing permissions.
--   **Dockerode**: Library for managing Docker containers programmatically.
+-   **Node.js**: JavaScript runtime for building scalable server-side applications. Used as the foundation for our backend services.
+-   **Express.js**: Web framework for building RESTful APIs. Handles HTTP requests and route management.
+-   **Prisma**: ORM for database management and migrations. Simplifies database operations and type-safe queries.
+-   **Permit.io**: Access control and RBAC solution for managing permissions. Enforces security policies across the application.
+-   **Dockerode**: Library for managing Docker containers programmatically. Provides the core container management functionality.
+-   **Socket.io**: Real-time communication library for enabling live updates. Powers the dashboard's real-time notifications logs and command executiong.
 
 ### Frontend
 
@@ -73,8 +74,8 @@ The system includes the following predefined roles with specific permissions:
 
 -   **Docker**: Containerization platform for deploying and managing services.
 -   **Docker Compose**: Tool for defining and running multi-container applications.
--   **Bitnami PostgreSQL**: Preconfigured PostgreSQL image for database services.
--   **Bitnami Redis**: Preconfigured Redis image for caching and session management.
+-   **Bitnami PostgreSQL**: Preconfigured PostgreSQL image for database services. Used for storing application data, user information, and audit logs.
+-   **Bitnami Redis**: Preconfigured Redis image for caching and session management. Used for rate limiting.
 
 ## Installation
 
