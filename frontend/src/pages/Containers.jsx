@@ -110,7 +110,7 @@ function Containers() {
         e.preventDefault();
         setSpawnLoading(true);
         try {
-            await api.post("/containers/spawn", {
+            const res = await api.post("/containers/spawn", {
                 image,
                 name,
                 ports: ports
@@ -132,6 +132,12 @@ function Containers() {
                           .filter((e) => e)
                     : [],
             });
+            if (res.status == 500) {
+                throw new Error(res.data.error);
+            }
+            if (res.status == 403) {
+                throw new Error(res.data.message);
+            }
             toast({ title: "Success", description: "Container spawned" });
             setShowSpawn(false);
             setImage("");
