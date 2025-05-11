@@ -15,7 +15,7 @@ const SYSTEM_IMAGES = [
     "ghcr.io/manangandhi1810/dockersensei-backend:latest",
     "ghcr.io/manangandhi1810/dockersensei-frontend:latest",
 ];
-const SYSTEM_NAMES = ["dockersensei-postgresql-1", "dockersensei-redis-1"];
+const SYSTEM_NAMES = ["dockersensei-postgresql-1", "dockersensei-redis-1", "watchtower"];
 
 const isSystemContainer = (container) => {
     if (
